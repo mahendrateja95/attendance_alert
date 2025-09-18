@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ "Sign Up" if mode=="signup" else "Sign In" }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="p-5 bg-light">
+    <div class="container">
+        <div class="form-container">
+            <h2 class="text-center mb-4">
+                {% if mode == "signup" %}
+                    👤 Sign Up
+                {% else %}
+                    🔐 Sign In
+                {% endif %}
+            </h2>
+            
+            <form method="POST">
+                {% if mode == "signup" %}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Enter your Name</label>
+                        <input type="text" 
+                               name="username" 
+                               id="username"
+                               placeholder="Enter your full name" 
+                               required 
+                               class="form-control form-control-lg">
+                        <div class="form-text">This will be used to create your face recognition profile</div>
+                    </div>
+                {% else %}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Select your Name</label>
+                        {% if registered_users %}
+                            <select name="username" 
+                                    id="username"
+                                    required 
+                                    class="form-select form-select-lg">
+                                <option value="">-- Choose your name --</option>
+                                {% for user in registered_users %}
+                                    <option value="{{ user }}">{{ user }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Select your registered name from the dropdown</div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <strong>No users registered yet!</strong><br>
+                                Please <a href="{{ url_for('form_page', mode='signup') }}" class="alert-link">sign up</a> first.
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                
+                {% if mode == "signup" or registered_users %}
+                    <div class="d-grid gap-2 mb-3">
+                        <button type="submit" class="btn btn-lg {{ 'btn-success' if mode=='signup' else 'btn-primary' }}">
+                            {% if mode == "signup" %}
+                                📷 Start Registration
+                            {% else %}
+                                🎯 Verify Identity
+                            {% endif %}
+                        </button>
+                    </div>
+                {% endif %}
+                
+                <div class="text-center">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                        ← Back to Home
+                    </a>
+                    {% if mode == "signup" %}
+                        <a href="{{ url_for('form_page', mode='signin') }}" class="btn btn-outline-primary ms-2">
+                            Already registered? Sign In
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('form_page', mode='signup') }}" class="btn btn-outline-success ms-2">
+                            New user? Sign Up
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

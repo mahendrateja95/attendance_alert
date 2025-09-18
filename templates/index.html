@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Auth - Welcome</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="text-center p-5 bg-light">
+    <h1 class="mb-5">Welcome to Face Authentication & Attendance System</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h3 class="card-title mb-4">Choose an option:</h3>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <a href="{{ url_for('form_page', mode='signup') }}" class="btn btn-success btn-lg w-100">
+                                👤 Sign Up
+                            </a>
+                            <p class="mt-2 text-muted">Register a new user with face data</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <a href="{{ url_for('form_page', mode='signin') }}" class="btn btn-primary btn-lg w-100">
+                                🔐 Sign In
+                            </a>
+                            <p class="mt-2 text-muted">Verify your identity using face recognition</p>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <a href="{{ url_for('attendance_page') }}" class="btn btn-warning btn-lg w-100">
+                                📋 Attendance Recognition
+                            </a>
+                            <p class="mt-2 text-muted">Multi-face recognition system for marking attendance</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
