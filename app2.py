@@ -14,6 +14,32 @@ ATTENDANCE_DIR = "attendance_collections"
 if not os.path.exists(ATTENDANCE_DIR):
     os.makedirs(ATTENDANCE_DIR)
 
+# Camera source configuration
+CAMERA_SOURCE = os.getenv("CAMERA_SOURCE", "0")  # default to device 0
+
+def init_camera_source():
+    """Initialize camera source - supports both device IDs and network streams"""
+    global CAMERA_SOURCE
+    
+    if CAMERA_SOURCE.isdigit():
+        # Local camera device
+        cap = cv2.VideoCapture(int(CAMERA_SOURCE))
+    else:
+        # Network camera stream (RTSP/MJPEG)
+        # For RTSP, prefer FFMPEG backend; for MJPEG HTTP, default works too
+        cap = cv2.VideoCapture(CAMERA_SOURCE, cv2.CAP_FFMPEG)
+    
+    if not cap.isOpened():
+        print(f"Warning: Cannot open camera source: {CAMERA_SOURCE}")
+        # Fallback to device 0 if network stream fails
+        if not CAMERA_SOURCE.isdigit():
+            print("Falling back to local camera device 0...")
+            cap = cv2.VideoCapture(0)
+            if not cap.isOpened():
+                raise RuntimeError(f"Cannot open camera source: {CAMERA_SOURCE} or fallback device 0")
+    
+    return cap
+
 video_capture = None
 capture_progress = {'current': 0, 'total': 300, 'status': 'idle'}
 attendance_data = []
@@ -140,7 +166,7 @@ def gen_capture(username):
     capture_progress = {'current': 0, 'total': 300, 'status': 'capturing'}
     
     if video_capture is None:
-        video_capture = cv2.VideoCapture(0)
+        video_capture = init_camera_source()
 
     # Load face cascade classifier
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -222,7 +248,7 @@ def gen_verify(username=None):
     global video_capture, global_face_recognizer, label_names, attendance_data
     
     if video_capture is None:
-        video_capture = cv2.VideoCapture(0)
+        video_capture = init_camera_source()
 
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
     confidence_threshold = 80  # Lower means more confident

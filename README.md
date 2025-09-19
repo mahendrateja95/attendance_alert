@@ -70,6 +70,36 @@ docker-compose logs -f
 docker-compose down
 ```
 
+### 📱 Network Camera Support (IP/Phone Cameras)
+
+Use any IP camera or turn your phone into a camera for remote deployment on VPS/cloud servers:
+
+#### Phone Setup
+- **Android**: Install "IP Webcam" app → Start server → Note URL like `http://PHONE_IP:8080/video`
+- **iOS**: Use "RTSP Camera" or "Larix Broadcaster" apps for RTSP streams
+
+#### Deploy with Network Camera
+
+```bash
+# For HTTP/MJPEG streams (IP Webcam)
+export CAMERA_SOURCE="http://192.168.1.101:8080/video"
+docker-compose -f docker-compose.network-camera.yml up -d
+
+# For RTSP streams
+export CAMERA_SOURCE="rtsp://user:pass@192.168.1.100:554/stream1"
+docker-compose -f docker-compose.network-camera.yml up -d
+```
+
+#### Test Network Camera
+
+```bash
+# Test camera connectivity inside container
+docker-compose exec attendance-app python test_network_camera.py
+
+# Test with specific URL
+docker-compose exec attendance-app python test_network_camera.py "http://192.168.1.101:8080/video"
+```
+
 ### Manual Docker Build
 ```bash
 # Build image

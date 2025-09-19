@@ -13,7 +13,16 @@ services:
     environment:
       - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
-      - CAMERA_SOURCE=${CAMERA_SOURCE:-0}  # Set to your IP camera URL or device ID
+      # NETWORK CAMERA EXAMPLES:
+      # For RTSP cameras:
+      # - CAMERA_SOURCE=rtsp://user:password@192.168.1.100:554/stream1
+      # For IP Webcam (Android app):
+      # - CAMERA_SOURCE=http://192.168.1.101:8080/video
+      # For MJPEG HTTP streams:
+      # - CAMERA_SOURCE=http://192.168.1.102:8081/mjpg/video.mjpg
+      # For local camera device (fallback):
+      # - CAMERA_SOURCE=0
+      - CAMERA_SOURCE=${CAMERA_SOURCE:-0}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/"]

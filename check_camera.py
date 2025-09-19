@@ -30,6 +30,7 @@ def test_opencv_camera():
     """Test OpenCV camera access"""
     print("\n📷 Testing OpenCV camera access...")
     
+    # Test local camera devices first
     for camera_id in range(3):  # Test camera IDs 0, 1, 2
         print(f"  Testing camera ID {camera_id}...")
         
@@ -56,7 +57,47 @@ def test_opencv_camera():
         except Exception as e:
             print(f"    ❌ Camera {camera_id}: Error - {str(e)}")
     
-    print("    ❌ No working cameras found")
+    print("    ❌ No working local cameras found")
+    return None
+
+def test_network_camera_source():
+    """Test network camera source from environment variable"""
+    camera_source = os.getenv("CAMERA_SOURCE", "0")
+    
+    if camera_source.isdigit():
+        print(f"\n🌐 CAMERA_SOURCE is set to local device: {camera_source}")
+        return None
+    
+    print(f"\n🌐 Testing network camera source: {camera_source}")
+    
+    try:
+        # For RTSP streams, use FFMPEG backend
+        if camera_source.startswith('rtsp://'):
+            cap = cv2.VideoCapture(camera_source, cv2.CAP_FFMPEG)
+        else:
+            # For HTTP/MJPEG streams, use default backend
+            cap = cv2.VideoCapture(camera_source)
+        
+        if not cap.isOpened():
+            print(f"    ❌ Network camera: Cannot open stream")
+            return None
+        
+        # Try to read a frame
+        ret, frame = cap.read()
+        
+        if ret and frame is not None:
+            height, width = frame.shape[:2]
+            print(f"    ✅ Network camera: Working! Resolution: {width}x{height}")
+            cap.release()
+            return camera_source
+        else:
+            print(f"    ❌ Network camera: Cannot read frame")
+        
+        cap.release()
+        
+    except Exception as e:
+        print(f"    ❌ Network camera: Error - {str(e)}")
+    
     return None
 
 def check_permissions():
@@ -91,13 +132,17 @@ def main():
     camera_available = check_camera_availability()
     check_permissions()
     working_camera = test_opencv_camera()
+    network_camera = test_network_camera_source()
     
     print("\n" + "=" * 60)
     print("📊 DIAGNOSTIC SUMMARY")
     print("=" * 60)
     
-    if working_camera is not None:
-        print(f"✅ SUCCESS: Camera {working_camera} is working!")
+    if working_camera is not None or network_camera is not None:
+        if working_camera is not None:
+            print(f"✅ SUCCESS: Local camera {working_camera} is working!")
+        if network_camera is not None:
+            print(f"✅ SUCCESS: Network camera stream is working!")
         print("🎉 Your attendance system should work properly.")
     else:
         print("❌ FAILURE: No working cameras found.")
@@ -105,18 +150,24 @@ def main():
         
         if os.path.exists('/.dockerenv'):
             print("   Docker-specific fixes:")
-            print("   1. Ensure camera devices are mapped: --device /dev/video0:/dev/video0")
-            print("   2. Run with privileged mode: --privileged")
-            print("   3. Check if camera is being used by another process")
-            print("   4. Restart Docker container")
+            print("   1. For network cameras: Set CAMERA_SOURCE environment variable")
+            print("   2. For local cameras: Ensure devices are mapped: --device /dev/video0:/dev/video0")
+            print("   3. Run with privileged mode: --privileged (for local cameras)")
+            print("   4. Check if camera is being used by another process")
+            print("   5. Restart Docker container")
         else:
             print("   Host system fixes:")
-            print("   1. Check if camera is connected and recognized by OS")
-            print("   2. Try: sudo usermod -a -G video $USER")
-            print("   3. Check camera permissions: ls -la /dev/video*")
-            print("   4. Install camera drivers if needed")
+            print("   1. For network cameras: Set CAMERA_SOURCE environment variable")
+            print("   2. For local cameras: Check if camera is connected and recognized by OS")
+            print("   3. Try: sudo usermod -a -G video $USER")
+            print("   4. Check camera permissions: ls -la /dev/video*")
+            print("   5. Install camera drivers if needed")
+        
+        print("\n📋 NETWORK CAMERA EXAMPLES:")
+        print("   export CAMERA_SOURCE='rtsp://user:pass@192.168.1.100:554/stream1'")
+        print("   export CAMERA_SOURCE='http://192.168.1.101:8080/video'  # IP Webcam")
     
-    return 0 if working_camera is not None else 1
+    return 0 if (working_camera is not None or network_camera is not None) else 1
 
 if __name__ == "__main__":
     sys.exit(main())
