@@ -1,10 +1,9 @@
-# Use Python 3.9 slim image
+# Use Python 3.9 slim (Debian trixie)
 FROM python:3.9-slim
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies for OpenCV and camera access
+# System deps for OpenCV + camera
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     libsm6 \
@@ -25,35 +24,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libv4lconvert0 \
     libgstreamer1.0-0 \
     libgstreamer-plugins-base1.0-0 \
-    libavcodec58 \
-    libavformat58 \
-    libswscale5 \
-    && rm -rf /var/lib/apt/lists/*
+    ffmpeg \
+ && rm -rf /var/lib/apt/lists/*
 
-
-# Copy requirements first for better caching
 COPY requirements.txt .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
 COPY . .
-
-# Create necessary directories
 RUN mkdir -p users attendance_collections static templates
 
-# Set environment variables
-ENV FLASK_APP=app2.py
-ENV FLASK_ENV=production
-ENV PYTHONPATH=/app
+ENV FLASK_APP=app2.py \
+    FLASK_ENV=production \
+    PYTHONPATH=/app
 
-# Expose port
 EXPOSE 5000
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/ || exit 1
+  CMD curl -f http://localhost:5000/ || exit 1
 
-# Run the application
 CMD ["python", "app2.py"]
