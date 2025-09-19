@@ -1,0 +1,35 @@
+version: '3.8'
+
+# Mock Camera Docker Compose - for VPS deployment without physical camera
+
+services:
+  attendance-app-mock:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: attendance-recognition-system-mock
+    ports:
+      - "8082:5000"
+    volumes:
+      - ./users:/app/users
+      - ./attendance_collections:/app/attendance_collections
+      - ./static:/app/static
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  default:
+    name: attendance-network-mock

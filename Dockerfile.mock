@@ -1,0 +1,35 @@
+# Mock Camera Dockerfile - for VPS deployment without physical camera
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install system dependencies (no camera drivers needed for mock)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    libgomp1 \
+    libgl1 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Create directories
+RUN mkdir -p users attendance_collections static templates
+
+# Set environment variables
+ENV FLASK_APP=app2_mock_camera.py
+ENV FLASK_ENV=production
+ENV PYTHONPATH=/app
+
+EXPOSE 5000
+
+# Run the mock camera version
+CMD ["python", "app2_mock_camera.py"]
