@@ -4,22 +4,32 @@ FROM python:3.9-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies for OpenCV and other packages
-RUN apt-get update && apt-get install -y \
+# Install system dependencies for OpenCV and camera access
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
-    libxrender-dev \
+    libxrender1 \
     libgomp1 \
     libgtk-3-0 \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
+    libgl1 \
+    libglx-mesa0 \
     libgthread-2.0-0 \
-    python3-dev \
     build-essential \
     cmake \
     pkg-config \
+    curl \
+    v4l-utils \
+    libv4l-0 \
+    libv4l2rds0 \
+    libv4lconvert0 \
+    libgstreamer1.0-0 \
+    libgstreamer-plugins-base1.0-0 \
+    libavcodec58 \
+    libavformat58 \
+    libswscale5 \
     && rm -rf /var/lib/apt/lists/*
+
 
 # Copy requirements first for better caching
 COPY requirements.txt .

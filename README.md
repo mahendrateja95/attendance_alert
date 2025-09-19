@@ -76,7 +76,7 @@ docker-compose down
 docker build -t attendance-system .
 
 # Run container
-docker run -d -p 8080:5000 --name attendance-app attendance-system
+docker run -d -p 8082:5000 --name attendance-app attendance-system
 ```
 
 ## ☁️ Production Deployment

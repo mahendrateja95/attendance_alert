@@ -46,7 +46,7 @@ chmod +x /usr/local/bin/docker-compose
 #### 2.2 Configure Security Rules
 1. Go to **Security** in aaPanel
 2. Add the following ports:
-   - **Port 8080** (for the attendance app)
+   - **Port 8082** (for the attendance app)
    - **Port 22** (SSH)
    - **Port 80** (HTTP)
    - **Port 443** (HTTPS)
@@ -132,7 +132,7 @@ server {
     server_name your-domain.com www.your-domain.com;
     
     location / {
-        proxy_pass http://127.0.0.1:8080;
+        proxy_pass http://127.0.0.1:8082;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -160,7 +160,7 @@ server {
    - 22 (SSH)
    - 80 (HTTP)
    - 443 (HTTPS)
-   - 8080 (Application - only if not using reverse proxy)
+   - 8082 (Application - only if not using reverse proxy)
 
 #### 6.2 Configure system firewall (if needed)
 ```bash
@@ -168,21 +168,21 @@ server {
 ufw allow 22
 ufw allow 80
 ufw allow 443
-ufw allow 8080
+ufw allow 8082
 ufw enable
 
 # CentOS (firewalld)
 firewall-cmd --permanent --add-port=22/tcp
 firewall-cmd --permanent --add-port=80/tcp
 firewall-cmd --permanent --add-port=443/tcp
-firewall-cmd --permanent --add-port=8080/tcp
+firewall-cmd --permanent --add-port=8082/tcp
 firewall-cmd --reload
 ```
 
 ### Step 7: Testing and Monitoring
 
 #### 7.1 Test the application
-- Direct access: `http://your-server-ip:8080`
+- Direct access: `http://161.97.155.89:8082`
 - Domain access: `http://your-domain.com` (if configured)
 
 #### 7.2 Check application logs
@@ -240,7 +240,7 @@ tar -czf backup-$(date +%Y%m%d).tar.gz users/ attendance_collections/
 docker-compose logs
 
 # Check if port is available
-netstat -tlnp | grep 8080
+netstat -tlnp | grep 8082
 
 # Rebuild container
 docker-compose down
@@ -291,7 +291,7 @@ crontab -e
 Your Attendance Recognition System should now be running on your Contabo server!
 
 **Access URLs:**
-- Direct: `http://your-server-ip:8080`
+- Direct: `http://161.97.155.89:8082`
 - Domain: `http://your-domain.com` (if configured)
 
 **Key Features Available:**

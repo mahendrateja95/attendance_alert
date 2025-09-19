@@ -1,37 +1,32 @@
 version: '3.8'
 
+# Alternative Docker Compose configuration for better camera access
+# Use this if the regular docker-compose.yml doesn't work with camera
+
 services:
   attendance-app:
     build: .
     container_name: attendance-recognition-system
-    ports:
-      - "8082:5000"
+    network_mode: host
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ./users:/app/users
       - ./attendance_collections:/app/attendance_collections
       - ./static:/app/static
+      - /dev:/dev
     devices:
       - /dev/video0:/dev/video0
       - /dev/video1:/dev/video1
+      - /dev/video2:/dev/video2
     privileged: true
     environment:
       - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
       - DISPLAY=${DISPLAY}
+      - PORT=8082
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-
-networks:
-  default:
-    name: attendance-network
