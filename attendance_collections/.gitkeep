@@ -1,2 +1,1 @@
-# This file keeps the attendance_collections directory in git
-# Attendance Excel files will be generated here during attendance marking
+# This file ensures the attendance_collections directory is tracked by Git but keeps it empty

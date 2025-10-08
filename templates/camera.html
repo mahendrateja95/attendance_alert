@@ -1,101 +1,552 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Camera - {{ mode|capitalize }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if mode == 'capture' %}Register Employee{% else %}Employee Check-in{% endif %} - Attendance System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        .progress-container {
-            margin: 20px 0;
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --error-color: #dc2626;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
         }
-        .status-text {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin: 10px 0;
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
         }
+
+        .camera-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .camera-card {
+            background: var(--card-background);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .camera-header {
+            margin-bottom: 2rem;
+        }
+
+        .camera-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .camera-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
         .video-container {
             position: relative;
-            display: inline-block;
+            margin: 2rem 0;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background: #000;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .face-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .face-box {
+            position: absolute;
+            border: 2px solid;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .face-box.recognized {
+            border-color: var(--success-color);
+        }
+
+        .face-box.unknown {
+            border-color: var(--error-color);
+        }
+
+        .face-box.detecting {
+            border-color: var(--warning-color);
+        }
+
+        .progress-section {
+            margin: 1.5rem 0;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-text {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .progress-count {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+            background-color: var(--border-color);
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .status-section {
+            margin: 1.5rem 0;
+        }
+
+        .status-card {
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .status-card.success {
+            background: #f0fdf4;
+            border-color: var(--success-color);
+        }
+
+        .status-card.warning {
+            background: #fffbeb;
+            border-color: var(--warning-color);
+        }
+
+        .status-card.error {
+            background: #fef2f2;
+            border-color: var(--error-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--background-color);
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            .camera-container {
+                margin: 1rem auto;
+                padding: 0 0.5rem;
+            }
+            
+            .camera-card {
+                padding: 1.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
-<body class="text-center p-5 bg-light">
-    <h2>{{ "Capturing face data" if mode=="capture" else "Verifying identity" }} for <b>{{ username }}</b></h2>
-    
-    {% if mode == "capture" %}
-    <div class="progress-container">
-        <div id="progress-text" class="status-text text-primary">Preparing to capture images...</div>
-        <div class="progress" style="height: 25px;">
-            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
-                 role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="300">
-                0/300
+<body>
+    <div class="camera-container">
+        <div class="camera-card">
+            <!-- Header -->
+            <div class="camera-header">
+                <h1 class="camera-title">
+                    {% if mode == 'capture' %}
+                        Register Employee
+                    {% else %}
+                        Employee Check-in
+                    {% endif %}
+                </h1>
+                <p class="camera-subtitle">
+                    {% if mode == 'capture' %}
+                        Setting up face recognition for {{ username }}
+                    {% else %}
+                        Checking in {{ username }}
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Video Container -->
+            <div class="video-container">
+                <video id="video" autoplay muted playsinline></video>
+                <div class="face-overlay" id="faceOverlay"></div>
+            </div>
+
+            <!-- Progress Section (for capture mode) -->
+            {% if mode == 'capture' %}
+            <div class="progress-section" id="progressSection">
+                <div class="progress-info">
+                    <span class="progress-text">Progress</span>
+                    <span class="progress-count" id="progressCount">0 / 10</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Status Section -->
+            <div class="status-section">
+                <div class="status-card" id="statusCard" style="display: none;">
+                    <div id="statusMessage"></div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn-secondary" onclick="goBack()">
+                    Back
+                </button>
+                {% if mode == 'verify' %}
+                <button class="btn-primary" onclick="startVerification()" id="verifyBtn">
+                    Start Check-in
+                </button>
+                {% endif %}
             </div>
         </div>
     </div>
-    {% endif %}
-    
-    <div class="video-container">
-        <img src="{{ url_for('video_feed', mode=mode, username=username) }}" width="640" height="480" class="border rounded">
-    </div>
-    
-    <p class="mt-3">{{ "Please stay still while we capture your face..." if mode=="capture" else "Look into the camera to verify." }}</p>
-    
-    {% if mode == "capture" %}
+
     <script>
-        let progressInterval;
+        const video = document.getElementById('video');
+        const faceOverlay = document.getElementById('faceOverlay');
+        const statusCard = document.getElementById('statusCard');
+        const statusMessage = document.getElementById('statusMessage');
         
-        function updateProgress() {
-            fetch('/progress')
-                .then(response => response.json())
-                .then(data => {
-                    const progressBar = document.getElementById('progress-bar');
-                    const progressText = document.getElementById('progress-text');
-                    
-                    if (data.status === 'capturing') {
-                        const percentage = (data.current / data.total) * 100;
-                        progressBar.style.width = percentage + '%';
-                        progressBar.setAttribute('aria-valuenow', data.current);
-                        progressBar.textContent = `${data.current}/${data.total}`;
-                        progressText.textContent = `Capturing images: ${data.current}/${data.total}`;
-                        progressText.className = 'status-text text-primary';
-                    } else if (data.status === 'training') {
-                        progressBar.style.width = '100%';
-                        progressBar.textContent = 'Training model...';
-                        progressText.textContent = 'Training face recognition model...';
-                        progressText.className = 'status-text text-warning';
-                    } else if (data.status === 'completed') {
-                        progressBar.style.width = '100%';
-                        progressBar.textContent = 'Completed!';
-                        progressText.textContent = 'Training completed successfully!';
-                        progressText.className = 'status-text text-success';
-                        clearInterval(progressInterval);
-                        
-                        // Redirect after training is complete
-                        setTimeout(function() {
-                            window.location.href = "{{ url_for('process', mode=mode, username=username) }}";
-                        }, 3000);
+        const mode = '{{ mode }}';
+        const username = '{{ username }}';
+        
+        let stream = null;
+        let isProcessing = false;
+        let captureInterval = null;
+        let verificationActive = false;
+
+        // Initialize camera
+        async function initCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'user'
                     }
-                })
-                .catch(error => {
-                    console.error('Error fetching progress:', error);
                 });
+                video.srcObject = stream;
+                
+                showStatus('success', 'Camera ready');
+                
+                if (mode === 'capture') {
+                    startCapture();
+                }
+                
+            } catch (error) {
+                console.error('Camera error:', error);
+                showStatus('error', 'Camera access denied');
+            }
         }
+
+        function startCapture() {
+            if (captureInterval) return;
+            
+            showStatus('warning', 'Starting registration...');
+            
+            captureInterval = setInterval(() => {
+                if (!isProcessing) {
+                    captureFrame();
+                }
+            }, 1000); // Capture every second
+        }
+
+        function startVerification() {
+            verificationActive = true;
+            document.getElementById('verifyBtn').disabled = true;
+            showStatus('warning', 'Checking in...');
+            
+            const verifyInterval = setInterval(() => {
+                if (!isProcessing && verificationActive) {
+                    verifyFrame();
+                }
+            }, 500); // Check every 500ms for verification
+            
+            // Auto-stop after 30 seconds
+            setTimeout(() => {
+                clearInterval(verifyInterval);
+                if (verificationActive) {
+                    verificationActive = false;
+                    document.getElementById('verifyBtn').disabled = false;
+                    showStatus('warning', 'Timeout - please try again');
+                }
+            }, 30000);
+        }
+
+        async function captureFrame() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                
+                const frameData = canvas.toDataURL('image/jpeg', 0.8);
+                
+                const response = await fetch('/upload_frame', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        frame: frameData,
+                        mode: 'capture',
+                        username: username
+                    })
+                });
+                
+                const result = await response.json();
+                handleCaptureResult(result);
+                
+            } catch (error) {
+                console.error('Capture error:', error);
+                showStatus('error', 'Capture failed');
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        async function verifyFrame() {
+            if (isProcessing || !verificationActive) return;
+            isProcessing = true;
+            
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                
+                const frameData = canvas.toDataURL('image/jpeg', 0.8);
+                
+                const response = await fetch('/upload_frame', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        frame: frameData,
+                        mode: 'verify',
+                        username: username
+                    })
+                });
+                
+                const result = await response.json();
+                handleVerificationResult(result);
+                
+            } catch (error) {
+                console.error('Verification error:', error);
+                showStatus('error', 'Check-in failed');
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        function handleCaptureResult(result) {
+            if (result.status === 'success') {
+                updateProgress(result.images_captured, result.progress.total);
+                showFaces(result.face_positions, 'detecting');
+                
+                
+                showStatus('success', `Image ${result.images_captured} captured`);
+                
+            } else if (result.status === 'completed') {
+                clearInterval(captureInterval);
+                captureInterval = null;
+                showStatus('success', 'Registration completed!');
+                checkTrainingProgress();
+                
+            } else if (result.status === 'low_quality') {
+                showStatus('warning', 'Please improve lighting');
+                
+            } else if (result.status === 'no_face') {
+                showStatus('warning', 'No face detected');
+                
+            } else if (result.status === 'error') {
+                showStatus('error', 'Capture error');
+            }
+        }
+
+        function handleVerificationResult(result) {
+            if (result.status === 'success' && result.faces.length > 0) {
+                const recognizedFaces = result.faces.filter(f => f.name === username && f.confidence > 85);
+                
+                if (recognizedFaces.length > 0) {
+                    const face = recognizedFaces[0];
+                    verificationActive = false;
+                    showStatus('success', 'Check-in successful!');
+                    showFaces([face.position], 'recognized');
+                    
+                    setTimeout(() => {
+                        window.location.href = '/attendance';
+                    }, 2000);
+                } else {
+                    showFaces(result.faces.map(f => f.position), 'unknown');
+                    showStatus('error', 'Face not recognized');
+                }
+            } else {
+                showStatus('warning', 'No face detected');
+            }
+        }
+
+        function showFaces(positions, type) {
+            faceOverlay.innerHTML = '';
+            
+            positions.forEach(pos => {
+                const faceBox = document.createElement('div');
+                faceBox.className = `face-box ${type}`;
+                
+                const videoRect = video.getBoundingClientRect();
+                const scaleX = videoRect.width / video.videoWidth;
+                const scaleY = videoRect.height / video.videoHeight;
+                
+                faceBox.style.left = (pos.x * scaleX) + 'px';
+                faceBox.style.top = (pos.y * scaleY) + 'px';
+                faceBox.style.width = (pos.w * scaleX) + 'px';
+                faceBox.style.height = (pos.h * scaleY) + 'px';
+                
+                faceOverlay.appendChild(faceBox);
+            });
+        }
+
+        function updateProgress(current, total) {
+            const progressBar = document.getElementById('progressBar');
+            const progressCount = document.getElementById('progressCount');
+            
+            if (progressBar && progressCount) {
+                const percentage = (current / total) * 100;
+                progressBar.style.width = percentage + '%';
+                progressCount.textContent = `${current} / ${total}`;
+            }
+        }
+
+        function showStatus(type, message) {
+            statusCard.style.display = 'block';
+            statusCard.className = `status-card ${type}`;
+            statusMessage.textContent = message;
+        }
+
+        async function checkTrainingProgress() {
+            try {
+                const response = await fetch('/progress');
+                const progress = await response.json();
+                
+                if (progress.status === 'completed') {
+                    showStatus('success', 'Registration completed!');
+                    setTimeout(() => {
+                        window.location.href = `/process/capture/${username}`;
+                    }, 2000);
+                } else if (progress.status === 'training') {
+                    showStatus('warning', 'Processing...');
+                    setTimeout(checkTrainingProgress, 2000);
+                } else if (progress.status === 'error') {
+                    showStatus('error', 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Progress check error:', error);
+                setTimeout(checkTrainingProgress, 2000);
+            }
+        }
+
+        function goBack() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            window.history.back();
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initCamera);
         
-        // Start checking progress immediately and then every 500ms
-        updateProgress();
-        progressInterval = setInterval(updateProgress, 500);
-        
-        // Fallback timeout (increased to accommodate 300 images + training)
-        setTimeout(function() {
-            window.location.href = "{{ url_for('process', mode=mode, username=username) }}";
-        }, 120000); // 2 minutes
+        // Cleanup when page unloads
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
     </script>
-    {% else %}
-    <script>
-        // For verification mode, keep original timeout
-        setTimeout(function() {
-            window.location.href = "{{ url_for('process', mode=mode, username=username) }}";
-        }, 15000);
-    </script>
-    {% endif %}
 </body>
+</html>
 </html>

@@ -3,7 +3,7 @@ version: '3.8'
 services:
   attendance-app:
     build: .
-    container_name: attendance-recognition-system
+    container_name: attendance-recognition-webrtc
     ports:
       - "8082:5000"
     volumes:
@@ -13,7 +13,7 @@ services:
     environment:
       - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
-      - CAMERA_SOURCE=${CAMERA_SOURCE:-0}  # Set to your IP camera URL or device ID
+      - PORT=5000
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/"]

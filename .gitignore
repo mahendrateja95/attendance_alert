@@ -1,4 +1,4 @@
-# Python cache
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -19,48 +19,58 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# Virtual environments
+# Flask
+instance/
+.webassets-cache
+
+# Environment variables
+.env
+.venv
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
 
-# IDE files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS files
+# OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Face recognition model files (these are generated)
+# Application specific
+users/*/
+attendance_collections/*.xls
+attendance_collections/*.xlsx
 global_face_model.yml
 label_mappings.pkl
+static/attendance_plot.png
 
-# User generated data (keep structure but not actual data)
-users/*/
-!users/.gitkeep
-
-# Attendance files (generated data)
-attendance_collections/*.xlsx
-attendance_collections/*.xls
-!attendance_collections/.gitkeep
+# Docker
+.dockerignore
 
 # Logs
 *.log
-
-# Environment variables
-.env
-.env.local
-
-# Docker volumes
-docker_data/
+logs/
 
 # Temporary files
 *.tmp
-*.bak
+*.temp
+
+# Keep sample directories but not their contents
+users/*
+!users/.gitkeep
+attendance_collections/*
+!attendance_collections/.gitkeep

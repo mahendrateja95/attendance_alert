@@ -1,93 +1,291 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>{{ "Sign Up" if mode=="signup" else "Sign In" }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if mode == 'signup' %}Register Employee{% else %}Employee Check-in{% endif %} - Attendance System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #059669;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
         .form-container {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 40px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: var(--card-background);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .form-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+            background: var(--card-background);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+            background: var(--card-background);
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-secondary:hover {
+            background: var(--background-color);
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .mode-toggle {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .mode-toggle-text {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .mode-toggle-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .mode-toggle-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
         }
     </style>
 </head>
-<body class="p-5 bg-light">
-    <div class="container">
-        <div class="form-container">
-            <h2 class="text-center mb-4">
-                {% if mode == "signup" %}
-                    👤 Sign Up
+<body>
+    <div class="form-container">
+        <!-- Header -->
+        <div class="form-header">
+            <div class="form-icon">
+                {% if mode == 'signup' %}
+                    <i class="fas fa-user-plus"></i>
                 {% else %}
-                    🔐 Sign In
+                    <i class="fas fa-user-check"></i>
                 {% endif %}
-            </h2>
-            
-            <form method="POST">
-                {% if mode == "signup" %}
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Enter your Name</label>
-                        <input type="text" 
-                               name="username" 
-                               id="username"
-                               placeholder="Enter your full name" 
-                               required 
-                               class="form-control form-control-lg">
-                        <div class="form-text">This will be used to create your face recognition profile</div>
-                    </div>
+            </div>
+            <h1 class="form-title">
+                {% if mode == 'signup' %}
+                    Register Employee
                 {% else %}
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Select your Name</label>
-                        {% if registered_users %}
-                            <select name="username" 
-                                    id="username"
-                                    required 
-                                    class="form-select form-select-lg">
-                                <option value="">-- Choose your name --</option>
-                                {% for user in registered_users %}
-                                    <option value="{{ user }}">{{ user }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="form-text">Select your registered name from the dropdown</div>
-                        {% else %}
-                            <div class="alert alert-warning">
-                                <strong>No users registered yet!</strong><br>
-                                Please <a href="{{ url_for('form_page', mode='signup') }}" class="alert-link">sign up</a> first.
-                            </div>
-                        {% endif %}
-                    </div>
+                    Employee Check-in
                 {% endif %}
-                
-                {% if mode == "signup" or registered_users %}
-                    <div class="d-grid gap-2 mb-3">
-                        <button type="submit" class="btn btn-lg {{ 'btn-success' if mode=='signup' else 'btn-primary' }}">
-                            {% if mode == "signup" %}
-                                📷 Start Registration
-                            {% else %}
-                                🎯 Verify Identity
-                            {% endif %}
-                        </button>
-                    </div>
+            </h1>
+            <p class="form-subtitle">
+                {% if mode == 'signup' %}
+                    Add new employee to the system
+                {% else %}
+                    Mark attendance for existing employee
                 {% endif %}
-                
-                <div class="text-center">
-                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
-                        ← Back to Home
-                    </a>
-                    {% if mode == "signup" %}
-                        <a href="{{ url_for('form_page', mode='signin') }}" class="btn btn-outline-primary ms-2">
-                            Already registered? Sign In
-                        </a>
-                    {% else %}
-                        <a href="{{ url_for('form_page', mode='signup') }}" class="btn btn-outline-success ms-2">
-                            New user? Sign Up
-                        </a>
-                    {% endif %}
-                </div>
-            </form>
+            </p>
+        </div>
+
+        <!-- Form -->
+        <form method="POST">
+            <div class="form-group">
+                <label for="username" class="form-label">
+                    {% if mode == 'signin' %}Employee Name{% else %}Employee Name{% endif %}
+                </label>
+                {% if mode == 'signin' and registered_users %}
+                    <select name="username" id="username" class="form-select" required>
+                        <option value="">Select employee</option>
+                        {% for user in registered_users %}
+                            <option value="{{ user }}">{{ user }}</option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    <input 
+                        type="text" 
+                        name="username" 
+                        id="username" 
+                        class="form-input" 
+                        placeholder="Enter employee name"
+                        required
+                    >
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-primary">
+                {% if mode == 'signup' %}
+                    Register Employee
+                {% else %}
+                    Check In
+                {% endif %}
+            </button>
+        </form>
+
+        <!-- Back Button -->
+        <a href="/" class="btn-secondary">
+            Back to Home
+        </a>
+
+        <!-- Mode Toggle -->
+        <div class="mode-toggle">
+            <div class="mode-toggle-text">
+                {% if mode == 'signup' %}
+                    Employee already registered?
+                {% else %}
+                    Need to register new employee?
+                {% endif %}
+            </div>
+            <a href="{% if mode == 'signup' %}/form/signin{% else %}/form/signup{% endif %}" class="mode-toggle-link">
+                {% if mode == 'signup' %}
+                    Check In Instead
+                {% else %}
+                    Register Employee
+                {% endif %}
+            </a>
         </div>
     </div>
+
+    <script>
+        // Form submission handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const submitBtn = form.querySelector('.btn-primary');
+            
+            form.addEventListener('submit', function(e) {
+                const username = document.getElementById('username').value.trim();
+                
+                if (!username) {
+                    e.preventDefault();
+                    alert('Please enter employee name');
+                    return;
+                }
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Processing...';
+                
+                // Re-enable after 5 seconds as fallback
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '{% if mode == "signup" %}Register Employee{% else %}Check In{% endif %}';
+                }, 5000);
+            });
+        });
+    </script>
 </body>
 </html>

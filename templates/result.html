@@ -1,11 +1,386 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Result</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if status == 'success' %}Success{% else %}Error{% endif %} - Attendance System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #059669;
+            --error-color: #dc2626;
+            --warning-color: #d97706;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .result-container {
+            background: var(--card-background);
+            border-radius: 1rem;
+            padding: 3rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .result-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-icon.success {
+            color: var(--success-color);
+        }
+
+        .result-icon.error {
+            color: var(--error-color);
+        }
+
+        .result-icon.warning {
+            color: var(--warning-color);
+        }
+
+        .result-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .result-message {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .result-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -3px rgba(99, 102, 241, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.875rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            background: var(--background-color);
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .result-details {
+            background: var(--background-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .detail-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .progress-indicator {
+            margin: 2rem 0;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .step.completed .step-icon {
+            background: var(--success-color);
+        }
+
+        .step.active .step-icon {
+            background: var(--primary-color);
+        }
+
+        .step.pending .step-icon {
+            background: var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .step-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .step.completed .step-label,
+        .step.active .step-label {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .auto-redirect {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 2rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .countdown {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .result-container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .result-title {
+                font-size: 1.75rem;
+            }
+            
+            .progress-steps {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
 </head>
-<body class="p-5 text-center {{ 'bg-success text-white' if status=='success' else 'bg-danger text-white' }}">
-    <h2>{{ message }}</h2>
-    <a href="{{ url_for('index') }}" class="btn btn-light mt-3">Back to Home</a>
+<body>
+    <div class="result-container">
+        <!-- Result Icon -->
+        <div class="result-icon {% if status == 'success' %}success{% elif status == 'fail' %}error{% else %}warning{% endif %}">
+            {% if status == 'success' %}
+                <i class="fas fa-check-circle"></i>
+            {% elif status == 'fail' %}
+                <i class="fas fa-times-circle"></i>
+            {% else %}
+                <i class="fas fa-exclamation-triangle"></i>
+            {% endif %}
+        </div>
+
+        <!-- Result Title -->
+        <h1 class="result-title">
+            {% if status == 'success' %}
+                Success!
+            {% elif status == 'fail' %}
+                Operation Failed
+            {% else %}
+                Attention Required
+            {% endif %}
+        </h1>
+
+        <!-- Result Message -->
+        <p class="result-message">{{ message }}</p>
+
+        <!-- Success Details (for registration completion) -->
+        {% if status == 'success' and 'Registration completed' in message %}
+        <div class="result-details">
+            <div class="detail-item">
+                <span class="detail-label">Images Captured</span>
+                <span class="detail-value">10 / 10</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Face Embeddings</span>
+                <span class="detail-value">Generated</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Quality Score</span>
+                <span class="detail-value">Excellent</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Status</span>
+                <span class="detail-value">Ready for Recognition</span>
+            </div>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-indicator">
+            <div class="progress-steps">
+                <div class="step completed">
+                    <div class="step-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <div class="step-label">Face Capture</div>
+                </div>
+                <div class="step completed">
+                    <div class="step-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="step-label">AI Processing</div>
+                </div>
+                <div class="step completed">
+                    <div class="step-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="step-label">Registration</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="result-actions">
+            {% if status == 'success' %}
+                {% if 'Registration completed' in message %}
+                    <a href="/form/signin" class="btn-primary">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Test Face Verification
+                    </a>
+                    <a href="/attendance" class="btn-secondary">
+                        <i class="fas fa-users me-2"></i>
+                        Multi-Face Recognition
+                    </a>
+                {% else %}
+                    <a href="/attendance" class="btn-primary">
+                        <i class="fas fa-users me-2"></i>
+                        Continue to Attendance
+                    </a>
+                {% endif %}
+            {% else %}
+                <a href="javascript:history.back()" class="btn-primary">
+                    <i class="fas fa-redo me-2"></i>
+                    Try Again
+                </a>
+            {% endif %}
+            
+            <a href="/" class="btn-secondary">
+                <i class="fas fa-home me-2"></i>
+                Back to Home
+            </a>
+        </div>
+
+        <!-- Auto-redirect notice (for success cases) -->
+        {% if status == 'success' %}
+        <div class="auto-redirect" id="autoRedirect" style="display: none;">
+            <i class="fas fa-info-circle me-2"></i>
+            Automatically redirecting in <span class="countdown" id="countdown">5</span> seconds...
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Auto-redirect for successful registration
+        {% if status == 'success' and 'Registration completed' in message %}
+        let countdown = 5;
+        const autoRedirectDiv = document.getElementById('autoRedirect');
+        const countdownSpan = document.getElementById('countdown');
+        
+        // Show auto-redirect notice after 2 seconds
+        setTimeout(() => {
+            autoRedirectDiv.style.display = 'block';
+            
+            const interval = setInterval(() => {
+                countdown--;
+                countdownSpan.textContent = countdown;
+                
+                if (countdown <= 0) {
+                    clearInterval(interval);
+                    window.location.href = '/form/signin';
+                }
+            }, 1000);
+        }, 2000);
+        {% endif %}
+
+        // Add some animation to the result icon
+        document.addEventListener('DOMContentLoaded', function() {
+            const resultIcon = document.querySelector('.result-icon');
+            
+            // Animate icon on load
+            resultIcon.style.transform = 'scale(0)';
+            resultIcon.style.transition = 'transform 0.5s ease-out';
+            
+            setTimeout(() => {
+                resultIcon.style.transform = 'scale(1)';
+            }, 100);
+        });
+    </script>
 </body>
 </html>

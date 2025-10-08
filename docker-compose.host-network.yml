@@ -1,28 +1,20 @@
 version: '3.8'
 
-# Alternative Docker Compose configuration for better camera access
-# Use this if the regular docker-compose.yml doesn't work with camera
+# Alternative Docker Compose configuration for host network
+# Note: With WebRTC, this is no longer needed but kept for compatibility
 
 services:
   attendance-app:
     build: .
-    container_name: attendance-recognition-system
+    container_name: attendance-recognition-webrtc-host
     network_mode: host
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ./users:/app/users
       - ./attendance_collections:/app/attendance_collections
       - ./static:/app/static
-      - /dev:/dev
-    devices:
-      - /dev/video0:/dev/video0
-      - /dev/video1:/dev/video1
-      - /dev/video2:/dev/video2
-    privileged: true
     environment:
       - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
-      - DISPLAY=${DISPLAY}
       - PORT=8082
     restart: unless-stopped
     logging:

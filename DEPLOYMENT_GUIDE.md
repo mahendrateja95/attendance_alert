@@ -1,11 +1,18 @@
-# 🚀 Deployment Guide - Attendance Recognition System
+# 🚀 Deployment Guide - Attendance Recognition System (WebRTC Version)
 
 ## Deploying to Contabo Server with aaPanel using Docker
+
+### 🌟 What's New - WebRTC Implementation
+- ✅ **No camera device mapping needed** (`--device /dev/video0`)
+- ✅ **No privileged mode required** (`--privileged`)
+- ✅ **Camera runs in user's browser** via WebRTC
+- ✅ **Works on ANY VPS/cloud server**
+- ✅ **HTTPS required for production** (camera access)
 
 ### Prerequisites
 - Contabo VPS server with Ubuntu/CentOS
 - aaPanel installed and configured
-- Domain name (optional but recommended)
+- Domain name with SSL certificate (required for WebRTC camera access)
 - SSH access to your server
 
 ### Step 1: Server Setup
@@ -49,263 +56,184 @@ chmod +x /usr/local/bin/docker-compose
    - **Port 8082** (for the attendance app)
    - **Port 22** (SSH)
    - **Port 80** (HTTP)
-   - **Port 443** (HTTPS)
+   - **Port 443** (HTTPS - required for WebRTC)
 
-#### 2.3 Configure Nginx (Optional - for domain setup)
-1. Go to **Website** → **Site**
-2. Click **Add Site**
-3. Enter your domain name
-4. Select **PHP version**: None (since we're using Docker)
-5. After creation, edit the site configuration
+#### 2.3 SSL Certificate Setup (REQUIRED for WebRTC)
+1. Go to **Website** → **SSL**
+2. Add your domain and configure SSL certificate
+3. Enable "Force HTTPS" for your domain
 
-### Step 3: Upload Application Files
+### Step 3: Deploy the Application
 
-#### 3.1 Create project directory
+#### 3.1 Clone the repository
 ```bash
-mkdir -p /www/wwwroot/attendance-system
-cd /www/wwwroot/attendance-system
+cd /opt
+git clone https://github.com/mahendrateja95/attendance_alert.git
+cd attendance_alert
 ```
 
-#### 3.2 Upload your project files
-You can use one of these methods:
-
-**Method A: Using SCP/SFTP**
+#### 3.2 Build and run with Docker Compose
 ```bash
-# From your local machine
-scp -r C:\Users\MahendraTejaKondapal\Downloads\Attendance_Alert/* root@your-server-ip:/www/wwwroot/attendance-system/
-```
+# Build and start the application (simplified - no camera mapping!)
+docker-compose up -d --build
 
-**Method B: Using Git (if you have a repository)**
-```bash
-git clone https://github.com/yourusername/attendance-system.git .
-```
-
-**Method C: Using aaPanel File Manager**
-1. Go to **Files** in aaPanel
-2. Navigate to `/www/wwwroot/attendance-system`
-3. Upload your project files
-
-### Step 4: Deploy the Application
-
-#### 4.1 Navigate to project directory
-```bash
-cd /www/wwwroot/attendance-system
-```
-
-#### 4.2 Make deployment script executable
-```bash
-chmod +x deploy.sh
-```
-
-#### 4.3 Run the deployment script
-```bash
-./deploy.sh
-```
-
-#### 4.4 Manual deployment (if script fails)
-```bash
-# Stop any existing containers
-docker-compose down
-
-# Build and start
-docker-compose build --no-cache
-docker-compose up -d
-
-# Check status
+# Check if it's running
 docker-compose ps
 docker-compose logs -f
 ```
 
-### Step 5: Configure Reverse Proxy (Optional)
-
-If you want to use a domain name and SSL:
-
-#### 5.1 Edit Nginx configuration in aaPanel
-1. Go to **Website** → **Site**
-2. Click **Settings** for your domain
-3. Go to **Config File**
-4. Replace the content with:
-
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com www.your-domain.com;
-    
-    location / {
-        proxy_pass http://127.0.0.1:8082;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # WebSocket support (if needed)
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-    }
-}
-```
-
-#### 5.2 Enable SSL (Let's Encrypt)
-1. In aaPanel, go to your site settings
-2. Click **SSL** tab
-3. Select **Let's Encrypt**
-4. Apply for SSL certificate
-
-### Step 6: Firewall Configuration
-
-#### 6.1 Configure aaPanel firewall
-1. Go to **Security** → **Firewall**
-2. Ensure these ports are open:
-   - 22 (SSH)
-   - 80 (HTTP)
-   - 443 (HTTPS)
-   - 8082 (Application - only if not using reverse proxy)
-
-#### 6.2 Configure system firewall (if needed)
+#### 3.3 Verify deployment
 ```bash
-# Ubuntu (UFW)
-ufw allow 22
-ufw allow 80
-ufw allow 443
-ufw allow 8082
-ufw enable
-
-# CentOS (firewalld)
-firewall-cmd --permanent --add-port=22/tcp
-firewall-cmd --permanent --add-port=80/tcp
-firewall-cmd --permanent --add-port=443/tcp
-firewall-cmd --permanent --add-port=8082/tcp
-firewall-cmd --reload
-```
-
-### Step 7: Testing and Monitoring
-
-#### 7.1 Test the application
-- Direct access: `http://161.97.155.89:8082`
-- Domain access: `http://your-domain.com` (if configured)
-
-#### 7.2 Check application logs
-```bash
-cd /www/wwwroot/attendance-system
-docker-compose logs -f
-```
-
-#### 7.3 Monitor resource usage
-```bash
-# Check Docker containers
+# Check if the container is running
 docker ps
-docker stats
 
-# Check system resources
-htop
-df -h
+# Test the application
+curl http://localhost:8082
 ```
 
-### Step 8: Application Management
+### Step 4: Nginx Reverse Proxy Setup (aaPanel)
 
-#### 8.1 Common commands
+#### 4.1 Create a new website in aaPanel
+1. Go to **Website** → **Add Site**
+2. Domain: `your-domain.com`
+3. Create the site
+
+#### 4.2 Configure reverse proxy
+1. Click on your domain → **Reverse Proxy**
+2. Add proxy with these settings:
+   - **Target URL**: `http://127.0.0.1:8082`
+   - **Domain**: `your-domain.com`
+   - **Send Host**: Yes
+
+#### 4.3 SSL Configuration for WebRTC
+1. Go to **SSL** for your domain
+2. Enable SSL certificate (Let's Encrypt or upload your own)
+3. Enable "Force HTTPS"
+4. **This is REQUIRED for camera access in browsers**
+
+### Step 5: Application Configuration
+
+#### 5.1 Environment Variables
+Create a `.env` file if needed:
 ```bash
-# View running containers
-docker-compose ps
+echo "FLASK_ENV=production" > .env
+echo "PORT=5000" >> .env
+```
 
-# View logs
+#### 5.2 Set proper permissions
+```bash
+chown -R 1000:1000 users attendance_collections
+chmod -R 755 users attendance_collections
+```
+
+### Step 6: Testing the WebRTC Implementation
+
+#### 6.1 Access the application
+- Open: `https://your-domain.com` (HTTPS required!)
+- You should see the attendance system homepage
+
+#### 6.2 Test camera functionality
+1. Click "Sign Up" to register a new user
+2. Enter a name and proceed to camera capture
+3. Browser will ask for camera permission - click "Allow"
+4. You should see your camera feed and face detection boxes
+5. Images will be captured (100 images, ~20 seconds)
+
+#### 6.3 Test recognition
+1. After registration, go to "Sign In"
+2. Select your name from dropdown
+3. Camera should recognize you with green box around face
+
+### Step 7: Monitoring and Maintenance
+
+#### 7.1 Check logs
+```bash
+# View application logs
 docker-compose logs -f
 
-# Restart application
+# Check container status
+docker-compose ps
+```
+
+#### 7.2 Restart application
+```bash
+# Restart the application
 docker-compose restart
 
-# Stop application
+# Rebuild if code changed
 docker-compose down
-
-# Update application
-git pull  # if using git
-docker-compose build --no-cache
-docker-compose up -d
+docker-compose up -d --build
 ```
 
-#### 8.2 Backup important data
+#### 7.3 Backup data
 ```bash
 # Backup user data and attendance records
-tar -czf backup-$(date +%Y%m%d).tar.gz users/ attendance_collections/
+tar -czf attendance_backup_$(date +%Y%m%d).tar.gz users attendance_collections
 ```
 
-### Step 9: Troubleshooting
+### Troubleshooting
 
-#### 9.1 Common issues and solutions
+#### Camera Issues
+- **"Camera not working"**: Ensure HTTPS is enabled (required for WebRTC)
+- **"Permission denied"**: User needs to click "Allow" in browser
+- **"Camera not found"**: Check if running on HTTPS and browser supports WebRTC
 
-**Application not starting:**
+#### Application Issues
 ```bash
-# Check logs
-docker-compose logs
+# Check if application is responding
+curl https://your-domain.com
 
-# Check if port is available
-netstat -tlnp | grep 8082
+# Check Docker logs
+docker-compose logs attendance-app
 
-# Rebuild container
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
+# Restart if needed
+docker-compose restart
 ```
 
-**Permission issues:**
+#### SSL Issues
+- Ensure SSL certificate is properly installed
+- Force HTTPS redirect is enabled
+- Check that port 443 is open in firewall
+
+### Performance Optimization
+
+#### 7.1 Resource allocation
 ```bash
-# Fix ownership
-chown -R root:root /www/wwwroot/attendance-system
-chmod -R 755 /www/wwwroot/attendance-system
+# Check resource usage
+docker stats
+
+# Adjust resources if needed in docker-compose.yml
 ```
 
-**Camera not working in Docker:**
-```bash
-# Add camera access to docker-compose.yml
-devices:
-  - /dev/video0:/dev/video0
-```
+#### 7.2 Image optimization
+- The new system captures only 100 images (vs 300 previously)
+- Faster capture rate for better user experience
+- Optimized face recognition for VPS deployment
 
-### Step 10: Production Optimizations
+### Security Considerations
 
-#### 10.1 Enable container auto-restart
-The docker-compose.yml already includes `restart: unless-stopped`
-
-#### 10.2 Set up log rotation
-```bash
-# Edit docker-compose.yml logging section
-logging:
-  driver: "json-file"
-  options:
-    max-size: "10m"
-    max-file: "3"
-```
-
-#### 10.3 Schedule regular backups
-```bash
-# Add to crontab
-crontab -e
-
-# Add this line for daily backup at 2 AM
-0 2 * * * cd /www/wwwroot/attendance-system && tar -czf backup-$(date +\%Y\%m\%d).tar.gz users/ attendance_collections/
-```
-
-### 🎉 Success!
-
-Your Attendance Recognition System should now be running on your Contabo server!
-
-**Access URLs:**
-- Direct: `http://161.97.155.89:8082`
-- Domain: `http://your-domain.com` (if configured)
-
-**Key Features Available:**
-- ✅ User registration with 300 face images
-- ✅ Face recognition with progress tracking
-- ✅ Multi-face recognition with name labels
-- ✅ Attendance marking system
-- ✅ Dropdown user selection for signin
-- ✅ Real-time face detection with green/red boxes
+1. **HTTPS**: Mandatory for WebRTC camera access
+2. **Firewall**: Only necessary ports should be open
+3. **Regular updates**: Keep Docker images and system updated
+4. **Backup**: Regular backups of user data and attendance records
 
 ### Support
 
-If you encounter any issues, check:
-1. Docker container logs: `docker-compose logs`
-2. System logs: `journalctl -u docker`
-3. aaPanel error logs in the interface
-4. Firewall and port configurations
+If you encounter issues:
+1. Check the logs: `docker-compose logs -f`
+2. Verify HTTPS is working
+3. Ensure camera permissions are granted in browser
+4. Test on different browsers (Chrome, Firefox, Safari, Edge)
+
+---
+
+## 🎉 Success Indicators
+
+- ✅ Application accessible via HTTPS
+- ✅ Camera permission prompt appears in browser
+- ✅ Face detection boxes appear during capture
+- ✅ User registration completes in ~20 seconds
+- ✅ Face recognition works during sign-in
+- ✅ Attendance marking functions properly
+
+Your WebRTC-based attendance system is now deployed and working on your Contabo server!
