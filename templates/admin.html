@@ -490,6 +490,7 @@
 
     <script>
         let currentDeleteUserId = null;
+        let csrfToken = null;
 
         // Admin login
         document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
@@ -511,6 +512,7 @@
                 const result = await response.json();
                 
                 if (result.status === 'success') {
+                    csrfToken = result.csrf_token;
                     document.getElementById('loginForm').style.display = 'none';
                     document.getElementById('adminPanel').style.display = 'block';
                     loadSystemStats();
@@ -613,7 +615,10 @@
         async function toggleUser(userId) {
             try {
                 const response = await fetch(`/admin/users/${userId}/toggle`, {
-                    method: 'POST'
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-Token': csrfToken
+                    }
                 });
                 
                 const result = await response.json();
@@ -649,7 +654,10 @@
             
             try {
                 const response = await fetch(`/admin/users/${currentDeleteUserId}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-Token': csrfToken
+                    }
                 });
                 
                 const result = await response.json();

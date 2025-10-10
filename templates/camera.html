@@ -377,7 +377,18 @@
                     })
                 });
                 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const result = await response.json();
+                
+                // Handle server error responses
+                if (result.error) {
+                    showStatus('error', result.error);
+                    return;
+                }
+                
                 handleCaptureResult(result);
                 
             } catch (error) {
@@ -444,8 +455,20 @@
             } else if (result.status === 'no_face') {
                 showStatus('warning', 'No face detected');
                 
+            } else if (result.status === 'eyes_closed') {
+                showStatus('warning', 'Please keep eyes open');
+                
+            } else if (result.status === 'embedding_failed') {
+                showStatus('error', 'Could not extract face features');
+                
+            } else if (result.status === 'save_failed') {
+                showStatus('error', 'Could not save face data');
+                
             } else if (result.status === 'error') {
                 showStatus('error', 'Capture error');
+            } else {
+                // Handle any unknown status
+                showStatus('error', result.message || 'Unknown error occurred');
             }
         }
 
@@ -473,6 +496,11 @@
 
         function showFaces(positions, type) {
             faceOverlay.innerHTML = '';
+            
+            // Handle undefined or empty positions
+            if (!positions || !Array.isArray(positions) || positions.length === 0) {
+                return;
+            }
             
             positions.forEach(pos => {
                 const faceBox = document.createElement('div');
@@ -516,7 +544,7 @@
                 if (progress.status === 'completed') {
                     showStatus('success', 'Registration completed!');
                     setTimeout(() => {
-                        window.location.href = `/process/capture/${username}`;
+                        window.location.href = '/form/signin';
                     }, 2000);
                 } else if (progress.status === 'training') {
                     showStatus('warning', 'Processing...');
