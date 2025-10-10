@@ -1175,4 +1175,4 @@ if __name__ == "__main__":
     print(f"👀 Eyes‑open threshold: {EYES_OPEN_THRESHOLD}")
     print("="*80 + "\n")
 
-    app.run(host=host, port=port, debug=debug_mode, threaded=True)
+    app.run(host=host, port=port, debug=debug_mode, threaded=True,  use_reloader=False)

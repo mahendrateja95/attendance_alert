@@ -1,62 +1,45 @@
 # =========================
-# Enhanced Face Recognition System - CPU Optimized Requirements
-# Compatible with Windows/Linux/macOS - CPU only for maximum compatibility
+# Face Recognition System - CPU Optimized Requirements
+# Based on app.py dependencies analysis
 # =========================
 
-# ---- Core web framework ----
+# ---- Core Web Framework ----
 Flask==3.0.0
 Werkzeug==3.0.1
 
-# ---- Computer Vision ----
-opencv-contrib-python==4.8.1.78
-Pillow>=10.0.0
-scikit-image>=0.21.0          # Use available pre-built wheel
+# ---- Computer Vision & Image Processing ----
+opencv-contrib-python==4.8.1.78    # cv2 for image processing
+Pillow>=10.0.0                      # PIL for image handling
+scikit-image>=0.21.0                # skimage.feature.local_binary_pattern
 
 # ---- Deep Learning (PyTorch CPU) ----
-# CPU-only build for maximum compatibility
-torch==2.8.0
-torchvision==0.23.0
+torch==2.1.0                        # CPU-only PyTorch
+torchvision==0.16.0                 # torch.nn.functional
+facenet-pytorch==2.5.3              # MTCNN, InceptionResnetV1
 
-# ---- Face Recognition Models ----
-facenet-pytorch==2.5.3        # MTCNN + InceptionResnetV1 (FaceNet)
-
-# ---- ArcFace (InsightFace) - CPU Compatible ----
-# Requires Microsoft Visual C++ Build Tools on Windows
-# Download from: https://visualstudio.microsoft.com/visual-cpp-build-tools/
-# Select "Desktop development with C++" workload during installation
-insightface==0.7.3            # Install after Build Tools are ready
-onnx==1.15.0                   # Required for InsightFace models
-onnxruntime==1.23.1           # CPU runtime for ONNX models
-
-# ---- MediaPipe for 3D Face Mesh ----
-# Using stable version compatible with CPU processing
-mediapipe==0.10.8
-protobuf==3.20.3              # Required for MediaPipe compatibility
-
-# ---- Vector Search (CPU) ----
-faiss-cpu==1.7.4              # CPU-only FAISS for similarity search
+# ---- Vector Search & Similarity ----
+faiss-cpu==1.7.4                    # FAISS for face embedding search
 
 # ---- Data Processing ----
-numpy>=1.24.0,<2.0.0         # Pin numpy < 2.0 for FAISS compatibility
-pandas>=2.0.0
-scipy==1.11.4
+numpy>=1.24.0,<2.0.0               # Core numerical operations (pinned for compatibility)
+scipy>=1.11.0                       # Scientific computing utilities
 
-# ---- Machine Learning Utilities ----
-scikit-learn==1.3.2
-matplotlib>=3.7.0             # For plotting attendance data
+# ---- Optional: MediaPipe for Face Mesh ----
+mediapipe==0.10.8                   # Face mesh for eye detection
+protobuf==3.20.3                    # Required for MediaPipe
 
-# ---- Excel Export ----
-openpyxl==3.1.2
+# ---- Optional: InsightFace (if available) ----
+# insightface==0.7.3                # Optional face recognition library
+# onnx==1.15.0                      # Required for InsightFace
+# onnxruntime==1.23.1               # CPU runtime for ONNX
 
-# ---- Additional Dependencies for Enhanced Features ----
-# Image processing and quality assessment
-imutils==0.5.4                # Image utilities
-# albumentations==1.3.1       # Skip on Windows due to compilation issues
+# ---- Core Python Libraries (usually included) ----
+# os, cv2, json, time, base64, secrets, hashlib, sqlite3, threading, warnings
+# io, datetime, collections - these are built-in Python modules
 
 # ---- Security & Utilities ----
-cryptography>=41.0.0          # For secure password hashing
-python-dateutil>=2.8.0        # Date/time utilities
+# No additional cryptography libraries needed - using built-in hashlib
 
 # ---- Development & Testing (Optional) ----
-# pytest>=7.4.0               # Uncomment for testing
-# requests>=2.31.0            # Uncomment for API testing
+# pytest>=7.4.0                     # For testing
+# requests>=2.31.0                  # For API testing
