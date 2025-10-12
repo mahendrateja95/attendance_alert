@@ -1,5 +1,6 @@
 """
-OPTIMIZED CPU FACE RECOGNITION SYSTEM
+NEURA-ID IDENTIFICATION SYSTEM
+Advanced Neural Network Identity Recognition Platform
 Fixed Issues:
 - Proper FAISS cosine similarity
 - Faster capture process
@@ -44,25 +45,25 @@ from skimage.feature import local_binary_pattern
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)
 
-USER_DIR = "users"
-ATTENDANCE_DIR = "attendance_collections"
-DATABASE_FILE = "face_recognition.db"
+USER_DIR = "identities"
+VERIFICATION_DIR = "verification_collections"
+DATABASE_FILE = "neura_id.db"
 
 # Optimized Thresholds
 RECOGNITION_THRESHOLD = 0.70  # Lower for better matching (cosine similarity)
-ATTENDANCE_THRESHOLD = 0.60     # Confidence threshold for attendance
+VERIFICATION_THRESHOLD = 0.60     # Confidence threshold for verification
 HIGH_QUALITY_THRESHOLD = 0.50   # Quality gate threshold
 DETECTION_CONFIDENCE = 0.90     # Face detection confidence
 LIVENESS_THRESHOLD = 0.55       # Anti-spoofing threshold
 EYES_OPEN_THRESHOLD = 0.40      # Eye openness threshold (relaxed)
 
 # Performance settings
-CAPTURE_IMAGES = 5              # Reduced from 12 for faster enrollment
+CAPTURE_IMAGES = 10              # Reduced from 12 for faster enrollment
 LIVENESS_FRAME_BUFFER = 3       # Reduced buffer size
 TEMPORAL_WINDOW = 5             # Smaller temporal window
 
 os.makedirs(USER_DIR, exist_ok=True)
-os.makedirs(ATTENDANCE_DIR, exist_ok=True)
+os.makedirs(VERIFICATION_DIR, exist_ok=True)
 
 # Force CPU mode
 device = torch.device('cpu')
@@ -76,10 +77,10 @@ user_id_to_name = {}
 face_mesh_api = None
 
 capture_progress = {'current': 0, 'total': CAPTURE_IMAGES, 'status': 'idle', 'message': ''}
-attendance_session = {'users': set(), 'start_time': None}
+verification_session = {'users': set(), 'start_time': None}
 
 print("=" * 80)
-print("OPTIMIZED FACE RECOGNITION SYSTEM")
+print("NEURA-ID IDENTIFICATION SYSTEM")
 print(f"Device: CPU (optimized)")
 print(f"Recognition Threshold: {RECOGNITION_THRESHOLD}")
 print(f"Capture Images: {CAPTURE_IMAGES}")
@@ -232,7 +233,7 @@ class FaceRecognitionSystem:
         c = conn.cursor()
         
         c.execute("""
-        CREATE TABLE IF NOT EXISTS users(
+        CREATE TABLE IF NOT EXISTS identities(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             full_name TEXT,
@@ -244,24 +245,24 @@ class FaceRecognitionSystem:
         )""")
         
         c.execute("""
-        CREATE TABLE IF NOT EXISTS face_embeddings(
+        CREATE TABLE IF NOT EXISTS identity_embeddings(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
+            identity_id INTEGER,
             embedding BLOB NOT NULL,
             quality_score REAL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(user_id) REFERENCES users(id)
+            FOREIGN KEY(identity_id) REFERENCES identities(id)
         )""")
         
         c.execute("""
-        CREATE TABLE IF NOT EXISTS attendance(
+        CREATE TABLE IF NOT EXISTS verifications(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
+            identity_id INTEGER,
             username TEXT,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             confidence REAL,
             session_id TEXT,
-            FOREIGN KEY(user_id) REFERENCES users(id)
+            FOREIGN KEY(identity_id) REFERENCES identities(id)
         )""")
         
         c.execute("""
@@ -290,8 +291,8 @@ class FaceRecognitionSystem:
         
         c.execute("""
         SELECT u.id, u.username, fe.embedding
-        FROM users u 
-        JOIN face_embeddings fe ON u.id = fe.user_id
+        FROM identities u 
+        JOIN identity_embeddings fe ON u.id = fe.identity_id
         WHERE u.is_active = 1
         ORDER BY u.id, fe.quality_score DESC
         """)
@@ -440,29 +441,29 @@ class FaceRecognitionSystem:
             conn = sqlite3.connect(DATABASE_FILE)
             c = conn.cursor()
             
-            # Get or create user
-            c.execute('SELECT id FROM users WHERE username = ?', (username,))
+            # Get or create identity
+            c.execute('SELECT id FROM identities WHERE username = ?', (username,))
             row = c.fetchone()
             
             if row:
-                user_id = row[0]
+                identity_id = row[0]
             else:
-                c.execute('INSERT INTO users (username) VALUES (?)', (username,))
-                user_id = c.lastrowid
+                c.execute('INSERT INTO identities (username) VALUES (?)', (username,))
+                identity_id = c.lastrowid
             
             # Save embedding
             blob = embedding.tobytes()
             c.execute("""
-            INSERT INTO face_embeddings (user_id, embedding, quality_score)
+            INSERT INTO identity_embeddings (identity_id, embedding, quality_score)
             VALUES (?, ?, ?)
-            """, (user_id, blob, quality_score))
+            """, (identity_id, blob, quality_score))
             
             # Update embedding count
             c.execute("""
-            UPDATE users SET embedding_count = (
-                SELECT COUNT(*) FROM face_embeddings WHERE user_id = ?
+            UPDATE identities SET embedding_count = (
+                SELECT COUNT(*) FROM identity_embeddings WHERE identity_id = ?
             ) WHERE id = ?
-            """, (user_id, user_id))
+            """, (identity_id, identity_id))
             
             conn.commit()
             conn.close()
@@ -526,17 +527,17 @@ def form_page(mode):
                                  message="Username is required")
         
         if mode == 'signup':
-            # Check if user exists
+            # Check if identity exists
             conn = sqlite3.connect(DATABASE_FILE)
             c = conn.cursor()
-            c.execute('SELECT id FROM users WHERE username = ?', (username,))
+            c.execute('SELECT id FROM identities WHERE username = ?', (username,))
             exists = c.fetchone()
             conn.close()
             
             if exists:
                 return render_template('result.html',
                                      status="fail",
-                                     message=f"User '{username}' already exists")
+                                     message=f"Identity '{username}' already exists")
             
             # Reset progress
             global capture_progress
@@ -547,16 +548,16 @@ def form_page(mode):
                 'message': ''
             }
             
-            # Create user directory
+            # Create identity directory
             os.makedirs(os.path.join(USER_DIR, username), exist_ok=True)
             
             return redirect(url_for('camera', mode='capture', username=username))
         
         elif mode == 'signin':
-            # Check if user exists
+            # Check if identity exists
             conn = sqlite3.connect(DATABASE_FILE)
             c = conn.cursor()
-            c.execute('SELECT id FROM users WHERE username = ? AND is_active = 1', 
+            c.execute('SELECT id FROM identities WHERE username = ? AND is_active = 1', 
                      (username,))
             exists = c.fetchone()
             conn.close()
@@ -564,7 +565,7 @@ def form_page(mode):
             if not exists:
                 return render_template('result.html',
                                      status="fail",
-                                     message=f"User '{username}' not found")
+                                     message=f"Identity '{username}' not found")
             
             return redirect(url_for('camera', mode='verify', username=username))
     
@@ -573,7 +574,7 @@ def form_page(mode):
     if mode == 'signin':
         conn = sqlite3.connect(DATABASE_FILE)
         c = conn.cursor()
-        c.execute('SELECT username FROM users WHERE is_active = 1 ORDER BY username')
+        c.execute('SELECT username FROM identities WHERE is_active = 1 ORDER BY username')
         registered = [r[0] for r in c.fetchall()]
         conn.close()
     
@@ -742,6 +743,9 @@ def process_recognition_frame(frame):
             # Recognize
             name, confidence = face_system.recognize_face(embedding)
             
+            # Add delay during identification process (1.5 seconds)
+            time.sleep(1.5)
+            
             # Check liveness if recognized
             liveness_score = 0.7
             if name != "Unknown":
@@ -782,59 +786,19 @@ def rebuild_index_async():
         capture_progress['status'] = 'error'
         capture_progress['message'] = f'Error: {e}'
 
+@app.route('/verification')
+def verification_page():
+    global verification_session
+    verification_session = {'users': set(), 'start_time': datetime.now()}
+    return render_template('attendance.html')
+
 @app.route('/attendance')
 def attendance_page():
-    global attendance_session
-    attendance_session = {'users': set(), 'start_time': datetime.now()}
-    return render_template('attendance.html')
+    return verification_page()
 
 @app.route('/mark_attendance', methods=['POST'])
 def mark_attendance():
-    try:
-        data = request.json
-        faces = data.get('faces', [])
-        
-        marked = []
-        session_id = f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        
-        conn = sqlite3.connect(DATABASE_FILE)
-        c = conn.cursor()
-        
-        for face in faces:
-            name = face.get('name')
-            confidence = face.get('confidence', 0)
-            
-            if name != "Unknown" and confidence >= ATTENDANCE_THRESHOLD * 100:
-                if name not in attendance_session['users']:
-                    # Get user ID
-                    c.execute('SELECT id FROM users WHERE username = ?', (name,))
-                    row = c.fetchone()
-                    
-                    if row:
-                        user_id = row[0]
-                        c.execute("""
-                        INSERT INTO attendance (user_id, username, confidence, session_id)
-                        VALUES (?, ?, ?, ?)
-                        """, (user_id, name, confidence, session_id))
-                        
-                        attendance_session['users'].add(name)
-                        marked.append({
-                            'username': name,
-                            'confidence': confidence
-                        })
-        
-        conn.commit()
-        conn.close()
-        
-        return jsonify({
-            "status": "success",
-            "marked_users": marked,
-            "message": f"Marked attendance for {len(marked)} users"
-        })
-    
-    except Exception as e:
-        print(f"Attendance error: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+    return record_verification()
 
 # ========================
 # Admin Routes
@@ -890,7 +854,7 @@ def get_users():
         c.execute("""
         SELECT id, username, full_name, email, created_at, last_seen, 
                embedding_count, is_active
-        FROM users 
+        FROM identities 
         ORDER BY created_at DESC
         """)
         
@@ -924,7 +888,7 @@ def admin_users_page():
         c.execute("""
         SELECT id, username, full_name, email, created_at, last_seen, 
                embedding_count, is_active
-        FROM users 
+        FROM identities 
         ORDER BY created_at DESC
         """)
         
@@ -956,36 +920,36 @@ def delete_user(user_id):
         conn = sqlite3.connect(DATABASE_FILE)
         c = conn.cursor()
         
-        # Check if user exists
-        c.execute("SELECT username FROM users WHERE id = ?", (user_id,))
+        # Check if identity exists
+        c.execute("SELECT username FROM identities WHERE id = ?", (user_id,))
         user = c.fetchone()
         
         if not user:
             conn.close()
-            return jsonify({"status": "error", "message": "User not found"}), 404
+            return jsonify({"status": "error", "message": "Identity not found"}), 404
         
         username = user[0]
         
-        # Delete user's face embeddings
-        c.execute("DELETE FROM face_embeddings WHERE user_id = ?", (user_id,))
+        # Delete identity's embeddings
+        c.execute("DELETE FROM identity_embeddings WHERE identity_id = ?", (user_id,))
         
-        # Delete user's attendance records
-        c.execute("DELETE FROM attendance WHERE user_id = ?", (user_id,))
+        # Delete identity's verification records
+        c.execute("DELETE FROM verifications WHERE identity_id = ?", (user_id,))
         
-        # Delete the user
-        c.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        # Delete the identity
+        c.execute("DELETE FROM identities WHERE id = ?", (user_id,))
         
         conn.commit()
         conn.close()
         
-        # Try to delete user's image directory
+        # Try to delete identity's image directory
         import shutil
-        user_dir = os.path.join(USER_DIR, username)
-        if os.path.exists(user_dir):
+        identity_dir = os.path.join(USER_DIR, username)
+        if os.path.exists(identity_dir):
             try:
-                shutil.rmtree(user_dir)
+                shutil.rmtree(identity_dir)
             except Exception as e:
-                print(f"Warning: Could not delete user directory {user_dir}: {e}")
+                print(f"Warning: Could not delete identity directory {identity_dir}: {e}")
         
         # Rebuild FAISS index after user deletion
         try:
@@ -995,7 +959,7 @@ def delete_user(user_id):
         
         return jsonify({
             "status": "success", 
-            "message": f"User '{username}' deleted successfully"
+            "message": f"Identity '{username}' deleted successfully"
         })
         
     except Exception as e:
@@ -1009,11 +973,11 @@ def rebuild_faiss_index():
         conn = sqlite3.connect(DATABASE_FILE)
         c = conn.cursor()
         
-        # Get all active users and their embeddings
+        # Get all active identities and their embeddings
         c.execute("""
         SELECT u.username, fe.embedding, fe.quality_score, fe.is_augmented
-        FROM users u 
-        JOIN face_embeddings fe ON u.id = fe.user_id
+        FROM identities u 
+        JOIN identity_embeddings fe ON u.id = fe.identity_id
         WHERE u.is_active = 1
         ORDER BY u.username, fe.quality_score DESC
         """)
@@ -1082,7 +1046,7 @@ def get_attendance():
         c = conn.cursor()
         c.execute("""
         SELECT a.id, a.username, a.timestamp, a.confidence, a.liveness_score, a.session_id
-        FROM attendance a
+        FROM verifications a
         ORDER BY a.timestamp DESC
         LIMIT 100
         """)
@@ -1113,24 +1077,24 @@ def admin_system_stats():
         conn = sqlite3.connect(DATABASE_FILE)
         c = conn.cursor()
         
-        # Get user count
-        c.execute("SELECT COUNT(*) FROM users WHERE is_active = 1")
+        # Get identity count
+        c.execute("SELECT COUNT(*) FROM identities WHERE is_active = 1")
         active_users = c.fetchone()[0]
         
-        # Get total user count
-        c.execute("SELECT COUNT(*) FROM users")
+        # Get total identity count
+        c.execute("SELECT COUNT(*) FROM identities")
         total_users = c.fetchone()[0]
         
         # Get total embeddings count
-        c.execute("SELECT COUNT(*) FROM face_embeddings")
+        c.execute("SELECT COUNT(*) FROM identity_embeddings")
         total_embeddings = c.fetchone()[0]
         
-        # Get attendance count today
-        c.execute("SELECT COUNT(*) FROM attendance WHERE DATE(timestamp) = DATE('now')")
+        # Get verification count today
+        c.execute("SELECT COUNT(*) FROM verifications WHERE DATE(timestamp) = DATE('now')")
         today_attendance = c.fetchone()[0]
         
-        # Get total attendance count
-        c.execute("SELECT COUNT(*) FROM attendance")
+        # Get total verification count
+        c.execute("SELECT COUNT(*) FROM verifications")
         total_attendance = c.fetchone()[0]
         
         conn.close()
@@ -1168,10 +1132,10 @@ if __name__ == "__main__":
     host = '0.0.0.0' if not debug_mode else '127.0.0.1'
 
     print("\n" + "="*80)
-    print("🚀 CPU‑ONLY FACE RECOG with Eyes‑Open Gate")
+    print("🚀 NEURA-ID IDENTIFICATION SYSTEM")
     print("="*80)
     print(f"📍 http://{host}:{port}")
-    print(f"🎯 Cosine threshold: {RECOGNITION_THRESHOLD}")
+    print(f"🎯 Recognition threshold: {RECOGNITION_THRESHOLD}")
     print(f"👀 Eyes‑open threshold: {EYES_OPEN_THRESHOLD}")
     print("="*80 + "\n")
 

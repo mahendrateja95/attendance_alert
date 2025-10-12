@@ -57,7 +57,10 @@ attendance_collections/*.xlsx
 global_face_model.yml
 label_mappings.pkl
 static/attendance_plot.png
-
+verification_collections/*
+!verification_collections/.gitkeep
+identities/*
+venv_attendance/*
 # Docker
 .dockerignore
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if mode == 'signup' %}Register Employee{% else %}Employee Check-in{% endif %} - Attendance System</title>
+    <title>{% if mode == 'signup' %}Register Identity{% else %}Identity Verification{% endif %} - NeuraID System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -188,16 +188,16 @@
             </div>
             <h1 class="form-title">
                 {% if mode == 'signup' %}
-                    Register Employee
+                    Register Identity
                 {% else %}
-                    Employee Check-in
+                    Identity Verification
                 {% endif %}
             </h1>
             <p class="form-subtitle">
                 {% if mode == 'signup' %}
-                    Add new employee to the system
+                    Add new identity profile to the system
                 {% else %}
-                    Mark attendance for existing employee
+                    Verify identity for access control
                 {% endif %}
             </p>
         </div>
@@ -206,11 +206,11 @@
         <form method="POST">
             <div class="form-group">
                 <label for="username" class="form-label">
-                    {% if mode == 'signin' %}Employee Name{% else %}Employee Name{% endif %}
+                    {% if mode == 'signin' %}Identity Name{% else %}Identity Name{% endif %}
                 </label>
                 {% if mode == 'signin' and registered_users %}
                     <select name="username" id="username" class="form-select" required>
-                        <option value="">Select employee</option>
+                        <option value="">Select identity</option>
                         {% for user in registered_users %}
                             <option value="{{ user }}">{{ user }}</option>
                         {% endfor %}
@@ -221,7 +221,7 @@
                         name="username" 
                         id="username" 
                         class="form-input" 
-                        placeholder="Enter employee name"
+                        placeholder="Enter identity name"
                         required
                     >
                 {% endif %}
@@ -229,9 +229,9 @@
 
             <button type="submit" class="btn-primary">
                 {% if mode == 'signup' %}
-                    Register Employee
+                    Register Identity
                 {% else %}
-                    Check In
+                    Verify Identity
                 {% endif %}
             </button>
         </form>
@@ -245,16 +245,16 @@
         <div class="mode-toggle">
             <div class="mode-toggle-text">
                 {% if mode == 'signup' %}
-                    Employee already registered?
+                    Identity already registered?
                 {% else %}
-                    Need to register new employee?
+                    Need to register new identity?
                 {% endif %}
             </div>
             <a href="{% if mode == 'signup' %}/form/signin{% else %}/form/signup{% endif %}" class="mode-toggle-link">
                 {% if mode == 'signup' %}
-                    Check In Instead
+                    Verify Identity Instead
                 {% else %}
-                    Register Employee
+                    Register Identity
                 {% endif %}
             </a>
         </div>
@@ -271,7 +271,7 @@
                 
                 if (!username) {
                     e.preventDefault();
-                    alert('Please enter employee name');
+                    alert('Please enter identity name');
                     return;
                 }
                 
@@ -282,7 +282,7 @@
                 // Re-enable after 5 seconds as fallback
                 setTimeout(() => {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = '{% if mode == "signup" %}Register Employee{% else %}Check In{% endif %}';
+                    submitBtn.textContent = '{% if mode == "signup" %}Register Identity{% else %}Verify Identity{% endif %}';
                 }, 5000);
             });
         });

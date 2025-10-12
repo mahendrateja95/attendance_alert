@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Attendance System</title>
+    <title>Admin Panel - NeuraID System</title>
     <style>
         * {
             margin: 0;
@@ -391,7 +391,7 @@
     <div class="admin-container">
         <div class="admin-header">
             <h1>Admin Panel</h1>
-            <p>Employee Management System</p>
+            <p>NeuraID Identity Management System</p>
         </div>
 
         <!-- Login Form -->
@@ -417,11 +417,11 @@
             <div class="stats-grid" id="statsGrid">
                 <div class="stat-card">
                     <div class="stat-number" id="activeUsers">-</div>
-                    <div class="stat-label">Active Users</div>
+                    <div class="stat-label">Active Identities</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="totalUsers">-</div>
-                    <div class="stat-label">Total Users</div>
+                    <div class="stat-label">Total Identities</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="totalEmbeddings">-</div>
@@ -429,11 +429,11 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="todayAttendance">-</div>
-                    <div class="stat-label">Today's Attendance</div>
+                    <div class="stat-label">Today's Verifications</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="totalAttendance">-</div>
-                    <div class="stat-label">Total Attendance</div>
+                    <div class="stat-label">Total Verifications</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="systemSize">-</div>
@@ -444,11 +444,11 @@
             <!-- Users Management -->
             <div class="users-section">
                 <div class="section-header">
-                    <h2 class="section-title">Employee Management</h2>
+                    <h2 class="section-title">Identity Management</h2>
                     <button class="refresh-btn" onclick="loadUsers()">Refresh</button>
                 </div>
 
-                <div id="usersLoading" class="loading">Loading employees...</div>
+                <div id="usersLoading" class="loading">Loading identities...</div>
                 <div id="usersError" class="error-message" style="display: none;"></div>
                 <div id="usersSuccess" class="success-message" style="display: none;"></div>
 
@@ -457,11 +457,11 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Employee Name</th>
+                                <th>Identity Name</th>
                                 <th>Status</th>
                                 <th>Images</th>
                                 <th>Embeddings</th>
-                                <th>Attendance</th>
+                                <th>Access Records</th>
                                 <th>Last Seen</th>
                                 <th>Size (MB)</th>
                                 <th>Actions</th>
@@ -479,10 +479,10 @@
     <div id="deleteModal" class="modal">
         <div class="modal-content">
             <h3>Confirm Deletion</h3>
-            <p>Are you sure you want to delete employee <strong id="deleteUsername"></strong>?</p>
-            <p style="color: #dc2626; font-weight: 600;">This action cannot be undone. All employee data, images, and attendance records will be permanently deleted.</p>
+            <p>Are you sure you want to delete identity <strong id="deleteUsername"></strong>?</p>
+            <p style="color: #dc2626; font-weight: 600;">This action cannot be undone. All identity data, images, and access records will be permanently deleted.</p>
             <div class="modal-actions">
-                <button class="confirm-btn" onclick="confirmDelete()">Delete Employee</button>
+                <button class="confirm-btn" onclick="confirmDelete()">Delete Identity</button>
                 <button class="cancel-btn" onclick="closeDeleteModal()">Cancel</button>
             </div>
         </div>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Group Attendance - Attendance System</title>
+    <title>Multi-Identity Recognition - NeuraID System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -361,10 +361,10 @@
         <div class="attendance-header">
             <h1 class="attendance-title">
                 <i class="fas fa-users me-2"></i>
-                Multi-Face Attendance Recognition
+                Multi-Identity Recognition System
             </h1>
             <p class="attendance-subtitle">
-                Advanced facial recognition system for simultaneous attendance marking
+                Advanced neural network system for simultaneous identity verification
             </p>
         </div>
         
@@ -388,7 +388,7 @@
                     </button>
                     <button class="btn-control btn-success" onclick="markAttendance()" id="markBtn" disabled>
                         <i class="fas fa-check"></i>
-                        Mark Attendance
+                        Record Verification
                     </button>
                     <button class="btn-control btn-secondary" onclick="exportAttendance()" id="exportBtn">
                         <i class="fas fa-download"></i>
@@ -412,11 +412,11 @@
                     <div class="stats-grid">
                         <div class="stat-item">
                             <div class="stat-number" id="facesDetected">0</div>
-                            <div class="stat-label">Faces Detected</div>
+                            <div class="stat-label">Identities Detected</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-number" id="usersRecognized">0</div>
-                            <div class="stat-label">Users Recognized</div>
+                            <div class="stat-label">Identities Verified</div>
                         </div>
                     </div>
         </div>
@@ -425,11 +425,11 @@
                 <div class="recognized-users-card">
                     <h3 class="card-title">
                         <i class="fas fa-user-check"></i>
-                        Recognized Users
+                        Verified Identities
                     </h3>
                     <div class="user-list" id="userList">
                         <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
-                            No users recognized yet
+                            No identities verified yet
                         </div>
                     </div>
                 </div>
@@ -639,7 +639,7 @@
             if (recognizedUsers.size === 0) {
                 userList.innerHTML = `
                     <div style="text-align: center; color: var(--text-secondary); padding: 2rem;">
-                        No users recognized yet
+                        No identities verified yet
                     </div>
                 `;
                 return;
@@ -691,23 +691,23 @@
                 const result = await response.json();
                 
                 if (result.status === 'success') {
-                    alert(`Attendance marked successfully for ${result.marked_users.length} users: ${result.marked_users.join(', ')}`);
+                    alert(`Verification recorded successfully for ${result.marked_users.length} identities: ${result.marked_users.join(', ')}`);
                 } else {
-                    alert('Error marking attendance: ' + result.message);
+                    alert('Error recording verification: ' + result.message);
                 }
                 
             } catch (error) {
-                console.error('Attendance marking error:', error);
-                alert('Error marking attendance. Please try again.');
+                console.error('Verification recording error:', error);
+                alert('Error recording verification. Please try again.');
             } finally {
                 markBtn.disabled = false;
-                markBtn.innerHTML = '<i class="fas fa-check"></i> Mark Attendance';
+                markBtn.innerHTML = '<i class="fas fa-check"></i> Record Verification';
             }
         }
 
         function exportAttendance() {
-            // This would typically trigger a download of attendance data
-            alert('Export functionality will download attendance records');
+            // This would typically trigger a download of verification data
+            alert('Export functionality will download verification records');
         }
 
         function updateStatus(type, message) {
