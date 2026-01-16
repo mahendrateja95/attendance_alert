@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  attendance-app:
+    build: .
+    container_name: attendance_alert_app
+    ports:
+      - "1111:1111"
+      - "1122:1122"
+    environment:
+      - FLASK_ENV=production
+      - PORT=1111
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # Persist user data and database
+      - ./users:/app/users
+      - ./attendance_collections:/app/attendance_collections
+      - ./neura_id.db:/app/neura_id.db
+      - ./input_files:/app/input_files
+      - ./output_files:/app/output_files
+    restart: unless-stopped
+    networks:
+      - attendance-network
+
+networks:
+  attendance-network:
+    driver: bridge
